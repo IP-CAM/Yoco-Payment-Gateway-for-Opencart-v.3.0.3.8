@@ -57,13 +57,20 @@ class ControllerExtensionPaymentYoco extends Controller
 		$this->private_key		= $this->config->get( 'payment_yoco_test_public_key' );
 		}
 		$yoco_data['publickey'] = $this->private_key;
+		$yoco_data['secret_key'] = $this->secret_key;
 		$preAmount =  $order_info['total'];
 		$amount    = substr(''.$preAmount, 0, -2);
-		$yoco_data['amouninCents'] = $amount;
+		$yoco_data['amountinCents'] = $amount;
 		 $currency = $this->getCurrency();
 		 $yoco_data['currency'] =$currency;
 		 $yoco_data['order_id'] =$order_id;
-		
+		 $yoco_data['bill_note'] ='ORD-'.$order_id;
+		 $yoco_data['customer_name'] = $order_info['payeeCategory2'];
+		 $yoco_data['customer_email'] =$order_info['email'];
+		 $yoco_data['modal_title'] =$order_info['payeeOrderItemDescription'];
+		 $yoco_data['order_summary'] =$order_info['payeeOrderItemName'];
+		 
+		 
 	   } 
 	
         if ( empty( $_POST ) && $order_info['payment_code'] === 'yoco' ) {

@@ -3,38 +3,43 @@
 
 
 <button id="checkout-button">Pay</button>
- <link rel='stylesheet prefetch' href='/css/yoco/demo/demo.css'>
+<script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
+ <link rel='stylesheet prefetch' href='/catalog/view/theme/default/stylesheets/yoco.demo.css'>
 <script src="/catalog/view/javascript/yoco.demo.js"></script>
+<script src="/catalog/view/javascript/yoco.sweetalert.min.js"></script>
 <script>
 var order_id = {{order_id}};
  // Lets decide on some data
-    var price = 20;
+    var price = {{amountinCents}};
     // the currency (must be ZAR)
-    var currency = 'ZAR';
+    var currency = {{currency}};
     // the name at the top of the popup (either shop or product)
-    var product_title = "Popup Demo: Yoco Hoodie";
+    var product_title = {{modal_title}};
     // the description of the purchase (product or product description)
-    var product_description = "Less is more with our signature hoodie. The box-fit style is always Insta-ready, with a 100% cotton weave that keeps you warm and cosy.";
+    var product_description = {{order_summary}};
     // shop (YOUR) logo
     var shop_logo = "/img/yoco/demo/logo.png";
     // Customer Name
-    var customer_name = "Jan Nortje";
+    var customer_name = {{customer_name}};
     // Customer Email
-    var customer_email = "jnortje007@gmail.com";
+    var customer_email = {{customer_email}};
     // Metadata (optional)
     var bill_note = "TEST-1";
 
   var yoco = new window.YocoSDK({
-    publicKey: '{{publickey}}',
+    publicKey: {{publickey}},
   });
   var checkoutButton = document.querySelector('#checkout-button');
  checkoutButton.addEventListener('click', function () {
 //	var pp = 
 	 yoco.showPopup({
-		amountInCents: {{(amouninCents * 100)}},
+		amountInCents: {{(amountinCents * 100)}},
 		currency: '{{currency}}',
-		name: ' Credit & Debit Gateway',
-		description: 'Please enter your details to complete this order',
+		 name: product_title,
+                // the description of the purchase (product or product description)
+        description: product_description,
+                // the url to the shop's logo/icon
+        image: shop_logo,
 		callback: function (result) {
 		  // This function returns a token that your server can use to capture a payment
 		  if (result.error) {
@@ -134,7 +139,7 @@ var order_id = {{order_id}};
    $( "#checkout-button" ).click();
 </script>
 
-<script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
+
 
 <script>
 

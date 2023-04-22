@@ -1,7 +1,7 @@
 <?php
 
 use Yoco\YocoClient;
-use Yoco\Exceptions\;
+use Yoco\Exceptions;
 class ModelExtensionPaymentYoco extends Model
 {
 
@@ -63,11 +63,11 @@ class ModelExtensionPaymentYoco extends Model
 		try{
 			// use the token received from the Web SDK
 	return $client->charge($token, $amountInCents, $currency, $metadata);
-		} catch (ApiKeyException $e) {
+		} catch (Yoco\Exceptions\ApiKeyException $e) {
 			$this->log_to_file("API keys incorrect: " . $e->getMessage());
-		} catch (DeclinedException $e) {
+		} catch (Yoco\Exceptions\DeclinedException $e) {
 			$this->log_to_file("Charge declined with error: " . $e->getMessage());
-		} catch (InternalException $e) {
+		} catch (Yoco\Exceptions\InternalException $e) {
 			$this->log_to_file("Unknown error: " . $e->getMessage());
 		}
 			
