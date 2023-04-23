@@ -2,7 +2,7 @@
 <modification>
 <name>YOCO - Payment Gateway</name>
 <code>yoco-000100</code>
-<version>1.0.0.0</version>
+<version>1.0.1.0</version>
 <author>Jan Nortje</author>
 <link>http://www.tubeless.co.za</link>
 <file path="catalog/controller/checkout/checkout.php">

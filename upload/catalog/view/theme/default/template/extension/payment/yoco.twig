@@ -1,10 +1,7 @@
 
-
-
-
 <button id="checkout-button">Pay</button>
 <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
- <link rel='stylesheet prefetch' href='/catalog/view/theme/default/stylesheets/yoco.demo.css'>
+ <link rel='stylesheet prefetch' href="/catalog/view/theme/default/stylesheets/yoco.demo.css">
 <script src="/catalog/view/javascript/yoco.demo.js"></script>
 <script src="/catalog/view/javascript/yoco.sweetalert.min.js"></script>
 <script>
@@ -18,346 +15,153 @@ var order_id = {{order_id}};
     // the description of the purchase (product or product description)
     var product_description = {{order_summary}};
     // shop (YOUR) logo
-    var shop_logo = "/img/yoco/demo/logo.png";
+    var shop_logo = "catalog/view/theme/default/image/logo.png";
     // Customer Name
     var customer_name = {{customer_name}};
     // Customer Email
     var customer_email = {{customer_email}};
     // Metadata (optional)
-    var bill_note = "TEST-1";
-
-  var yoco = new window.YocoSDK({
-    publicKey: {{publickey}},
-  });
-  var checkoutButton = document.querySelector('#checkout-button');
- checkoutButton.addEventListener('click', function () {
-//	var pp = 
-	 yoco.showPopup({
-		amountInCents: {{(amountinCents * 100)}},
-		currency: '{{currency}}',
-		 name: product_title,
-                // the description of the purchase (product or product description)
-        description: product_description,
-                // the url to the shop's logo/icon
-        image: shop_logo,
-		callback: function (result) {
-		  // This function returns a token that your server can use to capture a payment
-		  if (result.error) {
-			const errorMessage = result.error.message;
-			alert("error occured: " + errorMessage);
-		  } else {
-
-	   // Pass back the token to the backend for verification
-                    $.ajax(
-                        {
-                            // This is the URL to your backend
-                            'contentType': 'application/json; charset=utf-8',
-                            "Accept": "*/*",
-                            'crossDomain': 'true',
-                            'url': 'catalog/extension/payment/yoco/charge',
-                            'method': 'POST',
-                            'dataType': 'json',
-                            'beforeSend': function (xhr){ 
-                                xhr.setRequestHeader("X-CSRF-TOKEN", chargeToken.id);
-                                xhr.setRequestHeader("X-Auth-Secret-Key", secret_key );
-                                xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
-                                xhr.setRequestHeader('Authorization', make_base_auth(secret_key, public_key)); 
-                             },
-                            // 'headers': {
-                            //     // necessary for laravel's anti x-site hacking functionality
-                            //     'X-CSRF-TOKEN':  chargeToken.id,
-                            //    'X-Auth-Secret-Key':  secret_key 
-                            // },
-                          
-                            'data': 'token=' + chargeToken.id
-                                + '&amountInCents=' + (price * 100)
-                                + "&currency=" + currency
-                                // optional metadata
-                                + "&metadata[billNote]=" + bill_note
-                                + "&metadata[customerName]=" + customer_name
-                                + "&metadata[customerEmail]=" + customer_email
-                               // + '&metadata=' +json_decode(metadata)
-                            ,
-                            'success': function (data) {
-                                // log to demo console, remove for production
-                                log_activity("Successfully charged " + data.currency + " " + (data.amountInCents / 100) + " with ref " + data.id);
-                                formSubmitted = true;
-                                // log data to console for demo
-                                console.log(data);
-                                // raise an notification
-                                swal({
-                                    title: "Purchase successful",
-                                    text: "Your new gear is on its way!",
-                                    icon: "success",
-                                    button: "OK",
-                                }).then(function () {
-                                    location.reload();
-                                });
-                            },
-                            'error': function (result) {
-                                error = result.responseJSON;
-                                if (error) {
-                                    if (error.errors) {
-                                        // this is a validation error
-                                        // log to demo console, remove for production
-                                        log_activity("Failed to charge " + currency + " " + price + " : " + error.message);
-                                        $.each(error.errors, function (key, value) {
-                                            log_activity("Validation: " + key + " : " + value[0]);
-                                        });
-                                    } else if (error.charge_error) {
-                                        // log to demo console, remove for production
-                                        log_activity("Failed to charge " + currency + " " + price + " : " + error.charge_error.displayMessage);
-                                    } else {
-                                        log_activity("Failed to charge " + currency + " " + price + " : Unknown Error");
-                                    }
-                                } else {
-                                    log_activity("Failed to charge " + currency + " " + price + " : Unknown Error");
-                                }
-                                console.log(error);
-                                // Popup notification
-                                swal({
-                                    title: "Purchase failed",
-                                    text: "Something went wrong and we couldn't get this for you",
-                                    icon: "error",
-                                    button: "OK",
-                                });
-                            },
-                            'complete': function (result) {
-                                log_activity("Backend server call complete");
-                            }
-                        }
-                    );
-                }
-		  
-		  }
-		  // In a real integration - you would now pass this chargeToken back to your
-		  // server along with the order/basket that the customer has purchased.
-		},
-	 });
-	});
-	
-   $( "#checkout-button" ).click();
-</script>
-
-
-
-<script>
-
-function make_base_auth(user, password) {
-  var tok = user + ':' + password;
-  var hash = btoa(tok);
-  return "Basic " + hash;
-}
-
-    log_activity("Initializing Yoco SDK");
-
-    // Initialise the Yoco SDK with your public key
-    var yoco = new window.YocoSDK({
-        // Add your public key here
-        publicKey: public_key
-    });
-    // log to demo console, remove for production
-    log_activity("Initialized Yoco SDK");
-    
-//log_activity(<?PHP echo getBearerToken(); ?>)
-    // Trigger this code when your button is clicked
-    $('#pay')
-        .css('display', 'unset')
-        .on('click', function () {
-            // log to demo console, remove for production
-            log_activity("Showing Yoco Card Popup");
-            // Show the Yoco Popup
-            yoco.showPopup({
-                // the price (IN CENTS)
-                amountInCents: price * 100,
-                // the currency (eg. ZAR/USD/GBP)
-                currency: currency,
-                // the name at the top of the popup (either shop or product)
-                name: product_title,
-                // the description of the purchase (product or product description)
-                description: product_description,
-                // the url to the shop's logo/icon
-                image: shop_logo,
-                // Customer details
-                'customer': {
-                    'name': customer_name,
-                    'email': customer_email
-                },
-                // metadata
-                metadata: {
-                    'billNote': bill_note
-                },
-                callback: function (chargeToken) {
-                    // log to demo console, remove for production
-                    log_activity("Card tokenized, passing token to backend server");
-                    
-                    // Pass back the token to the backend for verification
-                    $.ajax(
-                        {
-                            // This is the URL to your backend
-                            'contentType': 'application/json; charset=utf-8',
-                            "Accept": "*/*",
-                            'crossDomain': 'true',
-                            'url': '/yoco/charge',
-                            'method': 'POST',
-                            'dataType': 'json',
-                            'beforeSend': function (xhr){ 
-                                xhr.setRequestHeader("X-CSRF-TOKEN", chargeToken.id);
-                                xhr.setRequestHeader("X-Auth-Secret-Key", secret_key );
-                                xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
-                                xhr.setRequestHeader('Authorization', make_base_auth(secret_key, public_key)); 
-                             },
-                            // 'headers': {
-                            //     // necessary for laravel's anti x-site hacking functionality
-                            //     'X-CSRF-TOKEN':  chargeToken.id,
-                            //    'X-Auth-Secret-Key':  secret_key 
-                            // },
-                          
-                            'data': 'token=' + chargeToken.id
-                                + '&amountInCents=' + (price * 100)
-                                + "&currency=" + currency
-                                // optional metadata
-                                + "&metadata[billNote]=" + bill_note
-                                + "&metadata[customerName]=" + customer_name
-                                + "&metadata[customerEmail]=" + customer_email
-                               // + '&metadata=' +json_decode(metadata)
-                            ,
-                            'success': function (data) {
-                                // log to demo console, remove for production
-                                log_activity("Successfully charged " + data.currency + " " + (data.amountInCents / 100) + " with ref " + data.id);
-                                formSubmitted = true;
-                                // log data to console for demo
-                                console.log(data);
-                                // raise an notification
-                                swal({
-                                    title: "Purchase successful",
-                                    text: "Your new gear is on its way!",
-                                    icon: "success",
-                                    button: "OK",
-                                }).then(function () {
-                                    location.reload();
-                                });
-                            },
-                            'error': function (result) {
-                                error = result.responseJSON;
-                                if (error) {
-                                    if (error.errors) {
-                                        // this is a validation error
-                                        // log to demo console, remove for production
-                                        log_activity("Failed to charge " + currency + " " + price + " : " + error.message);
-                                        $.each(error.errors, function (key, value) {
-                                            log_activity("Validation: " + key + " : " + value[0]);
-                                        });
-                                    } else if (error.charge_error) {
-                                        // log to demo console, remove for production
-                                        log_activity("Failed to charge " + currency + " " + price + " : " + error.charge_error.displayMessage);
-                                    } else {
-                                        log_activity("Failed to charge " + currency + " " + price + " : Unknown Error");
-                                    }
-                                } else {
-                                    log_activity("Failed to charge " + currency + " " + price + " : Unknown Error");
-                                }
-                                console.log(error);
-                                // Popup notification
-                                swal({
-                                    title: "Purchase failed",
-                                    text: "Something went wrong and we couldn't get this for you",
-                                    icon: "error",
-                                    button: "OK",
-                                });
-                            },
-                            'complete': function (result) {
-                                // log to demo console, remove for production
-                                log_activity("Backend server call complete");
-                            }
-                        }
-                    );
-                }
+    var bill_note =  {{bill_note}};;
+     var _secretkey = '{{secret_key}}';
+    var _publickey = '{{publickey}}';
+var yoco = new window.YocoSDK({
+  publicKey: _publickey,
+});
+var checkoutButton = document.querySelector('#checkout-button');
+checkoutButton.addEventListener('click', function () { 
+  yoco.showPopup({
+    amountInCents: {{(amountinCents * 100)}},
+    currency: {{currency}},
+    name: product_title,
+    description: product_description,
+    image: shop_logo,
+    callback: function (result) {
+      if (result.error) {
+        const errorMessage = result.error.message;
+        alert("error occured: " + errorMessage);
+      } else {
+        $.ajax({
+          'contentType': 'application/json; charset=utf-8',
+          "Accept": "*/*",
+          'crossDomain': 'true',
+          'url': 'catalog/extension/payment/yoco/charge',
+          'method': 'POST',
+          'dataType': 'json',
+          'beforeSend': function (xhr){ 
+       //     xhr.setRequestHeader("X-CSRF-TOKEN", result.id);
+            xhr.setRequestHeader("X-Auth-Secret-Key", _secretkey );
+            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+            xhr.setRequestHeader('Authorization', make_base_auth(_secret_key, _publickey)); 
+          },
+        //  'data': 'token=' + result.id
+            + '&amountInCents=' + amountInCents
+            + "&currency=" + currency
+            + "&metadata[billNote]=" + bill_note
+            + "&metadata[customerName]=" + customer_name
+            + "&metadata[customerEmail]=" + customer_email,
+             callback: function (result) {
+        //  'success': function (data) {
+              if (result.error) {
+          const errorMessage = result.error.message;
+             swal({
+              title: "Token error",
+              text: "Response from YUCO " + result.error.message,
+              icon: "error",
+              button: "OK",
+            }).then(function () {
+              location.reload();
             });
+        } else {
+               $.ajax({
+          'contentType': 'application/json; charset=utf-8',
+          "Accept": "*/*",
+          'crossDomain': 'true',
+          'url': 'catalog/extension/payment/yoco/postToken',
+          'method': 'POST',
+          'dataType': 'json',
+          'beforeSend': function (xhr){ },
+              'data': 'token=' + result.id
+              + '&order_id=' + order_id
+              + '&action=success' 
+            + '&amountInCents=' + amountInCents
+            + "&currency=" + currency
+            + "&metadata[billNote]=" + bill_note
+            + "&metadata[customerName]=" + customer_name
+            + "&metadata[customerEmail]=" + customer_email,
+             callback: function (result) {
+           'success': function (data) {
+            if(!data.error){
+            swal({
+              title: "Thank You",
+              text: "Your Payment was successfull<br/>Thank you for your bussiness, hope to see you soon! ",
+              icon: "success",
+              button: "OK",
+            }).then(function () {
+                window.location = 'checkout/success';
+             // location.reload();
+            });
+            }else{
+                 swal({
+              title: "Purchase failed",
+              text: "Something went wrong and we couldn't get this for you<br/>"
+              + error,
+              icon: "error",
+              button: "OK",
+            });  
+            }
+           },
+       //    },
+               'error': function (result) {
+            error = result.responseJSON;
+              swal({
+              title: "Purchase failed",
+                 text: "Something went wrong and we couldn't get this for you<br/>"
+              + error,
+              icon: "error",
+              button: "OK",
+            });
+               }
 
+         // alert("card successfully tokenised: " + result.id);
+        }
+         
+          },
+          'error': function (result) {
+            error = result.responseJSON;
+            if (error) {
+              if (error.errors) {
+                log_activity("Failed to charge " + currency + " " + price + " : " + error.message);
+                $.each(error.errors, function (key, value) {
+                  log_activity("Validation: " + key + " : " + value[0]);
+                });
+              } else if (error.charge_error) {
+                log_activity("Failed to charge " + currency + " " + price + " : " + error.charge_error.displayMessage);
+              } else {
+                log_activity("Failed to charge " + currency + " " + price + " : Unknown Error");
+              }
+            } else {
+              log_activity("Failed to charge " + currency + " " + price + " : Unknown Error");
+            }
+            console.log(error);
+            swal({
+              title: "Purchase failed",
+              text: "Something went wrong and we couldn't get this for you",
+              icon: "error",
+              button: "OK",
+            });
+          },
+          'complete': function (result) {
+            log_activity("Backend server call complete");
+          },
         });
-</script>
-
-
-<!-- Demo Tools -->
-<div id="demo_debug" class="slider d-lg-inline d-none">
-    <div class="title">
-        Demo Tools
-    </div>
-    <div class="tool-yococards error hide">
-        <div class="title">
-            Error
-        </div>
-        <div class="yococard">
-        </div>
-    </div>    
-    <div class="tool-yococards cards">
-        <div class="title">
-            Test Cards
-        </div>
-        <div class="yococard live hide">
-            <span class="text">Test cards are not available because you are using live keys</span>
-        </div>
-        <div class="yococard notlive hide">
-            <span class="text">
-                Click to copy, then paste into the card field.<br>
-                Use any future expiry date and CVV number.
-            </span>
-        </div>
-        <div class="yococard notlive hide">
-            <span class="yocobadge yocobadge-success copy-card" style="width: 100%">
-                <span style="float: left;">Success</span>
-                <span style="float: right;" class="copy-text" data-copy="4111 1111 1111 1111">&nbsp;&nbsp;&nbsp;&nbsp;4111 1111 1111 1111</span>
-            </span>
-        </div>
-        <div class="yococard notlive hide">
-            <span class="yocobadge yocobadge-fail copy-card" style="width: 100%">
-                <span style="float: left;">Failure</span>
-                <span style="float: right;" class="copy-text" data-copy="5105 1051 0510 5100">&nbsp;&nbsp;&nbsp;&nbsp;5105 1051 0510 5100</span>
-            </span>
-        </div>
-    </div>
-    <div class="tool-yococards keys">
-        <div class="title">
-            KEYS
-        </div>
-        <div class="yococard">
-            <span class="yocobadge">
-                Public:<br> <?php echo($client->getPublicKey()); ?>
-            </span>
-        </div>
-        <div class="yococard">
-            <span class="yocobadge">
-                Secret:<br> <?php echo($client->getRedactedSecretKey()); ?>
-            </span>
-        </div>        
-        <div class="yococard">
-            <span class="text">Keep the secret key secure on your server!</span>
-        </div>
-    </div>
-    <div class="tool-yococards monitor">
-        <div class="title">
-            Activity Monitor
-        </div>
-        <div class="yococard">
-            <textarea class="activity" rows="20" disabled></textarea>
-        </div>
-    </div>
-</div>
-
-<!-- Helper code for this demo -->
-<script src="/js/yoco/demo/demo.js"></script>
-<script src="/js/yoco/demo/sweetalert.min.js"></script>
-
-<script>
-    var errorMessages =  <?php  echo($errorMessages); ?>;
-    if (errorMessages.length) {
-        showErrors(errorMessages);
+      }
     }
+  });
+});
 
-    var keyEnv = <?php echo($keyEnv); ?>;
-    log_activity(`Using ${keyEnv} keys`);    
-   // enableLiveKeys(keyEnv === "live");
-</script>
+$( "#checkout-button" ).click();
+
+ </script>
+
  
 

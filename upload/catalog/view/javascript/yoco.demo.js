@@ -66,15 +66,16 @@ $('.copy-card').each(function () {
 
 // set listener for setting public key
 $('input[name=public_key]')
-    .val(public_key)
+    .val(_publickey)
     .on('change', function (e) {
         // This is for demo purposes only, you wouldn't let your UI change your public key
-        let public_key = $('input[name=public_key]').val();
+        let _publickey = $('input[name=public_key]').val();
 
-        log_activity("Changing public key to " + public_key + ", demo only.")
+        log_activity("Changing public key to " + _publickey + ", demo only.")
         yoco = new window.YocoSDK({
-            publicKey: public_key
+            publicKey: _publickey
         });
 
     });
+
 
