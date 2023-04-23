@@ -45,6 +45,7 @@ class ControllerExtensionPaymentYoco extends Controller
        $this->load->model( self::CHECKOUT_MODEL );
 		$order_id = $this->session->data['order_id'] ;
 	   $order_info = $this->model_checkout_order->getOrder( $order_id);
+	   $products_info = $this->model_checkout_order->getOrderProducts( $order_id);
 
 	   if ( empty( $_POST ) && $order_info['payment_code'] === 'yoco' ) {
 	
@@ -65,10 +66,10 @@ class ControllerExtensionPaymentYoco extends Controller
 		 $yoco_data['currency'] =$currency;
 		 $yoco_data['order_id'] =$order_id;
 		 $yoco_data['bill_note'] ='ORD-'.$order_id;
-		 $yoco_data['customer_name'] = $order_info['payeeCategory2'];
+		 $yoco_data['customer_name'] = $order_info['payment_firstname'].' '.$order_info['payment_lastname'];
 		 $yoco_data['customer_email'] =$order_info['email'];
-		 $yoco_data['modal_title'] =$order_info['payeeOrderItemDescription'];
-		 $yoco_data['order_summary'] =$order_info['payeeOrderItemName'];
+		 $yoco_data['modal_title'] =' Credit/Debit Gateway for .'.$order_info['store_name'];
+		 $yoco_data['order_summary'] =$products_info[0]['name'].' for delivery';
 		 
 		 
 	   } 
@@ -228,7 +229,7 @@ if($result){
 
 	
 	public function setActivityData($order,$orderId){
-	//	$this->load->model('customer/order');
+		$this->load->model('customer/order');
 		if ( $this->customer->isLogged() ) {
 			$activity_data = array(
 				'customer_id' => $this->customer->getId(),
