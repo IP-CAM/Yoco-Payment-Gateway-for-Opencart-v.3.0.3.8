@@ -1,6 +1,7 @@
 <?php
 use \Yoco\YocoClient;
 use \Yoco\Exceptions;
+
 class ControllerExtensionPaymentYoco extends Controller
 {
     protected $testmode;
@@ -12,7 +13,9 @@ class ControllerExtensionPaymentYoco extends Controller
 
 	
 	protected $data_to_send = array();
-	
+	protected  function withSingleQ($s) {
+		return "'".$s."'";
+	}
 
 	public function getCurrency(){
 		if ( $this->config->get( 'config_currency' ) != '' ) {
@@ -63,13 +66,13 @@ class ControllerExtensionPaymentYoco extends Controller
 		$amount    = substr(''.$preAmount, 0, -2);
 		$yoco_data['amountinCents'] = $amount;
 		 $currency = $this->getCurrency();
-		 $yoco_data['currency'] =$currency;
+		 $yoco_data['currency'] = $this->withSingleQ($currency);
 		 $yoco_data['order_id'] =$order_id;
-		 $yoco_data['bill_note'] ='ORD-'.$order_id;
-		 $yoco_data['customer_name'] = $order_info['payment_firstname'].' '.$order_info['payment_lastname'];
-		 $yoco_data['customer_email'] =$order_info['email'];
-		 $yoco_data['modal_title'] =' Credit/Debit Gateway for .'.$order_info['store_name'];
-		 $yoco_data['order_summary'] =$products_info[0]['name'].' for delivery';
+		 $yoco_data['bill_note'] =$this->withSingleQ('ORD-'.$order_id);
+		 $yoco_data['customer_name'] = $this->withSingleQ("{$order_info['payment_firstname']} {$order_info['payment_lastname']}");
+		 $yoco_data['customer_email'] = $this->withSingleQ((filter_var( $order_info['email'], FILTER_SANITIZE_EMAIL) ));
+		 $yoco_data['modal_title'] = $this->withSingleQ("Credit and Debit Gateway for {$order_info['store_name']} online store");
+		 $yoco_data['order_summary'] =$this->withSingleQ("{$products_info[0]['name']} for delivery");
 		 
 		 
 	   } 
@@ -88,8 +91,8 @@ class ControllerExtensionPaymentYoco extends Controller
 		
 		}
 
-		header( 'HTTP/1.0 200 OK' );
-		flush(); 
+		//header( 'HTTP/1.0 200 OK' );
+		//flush(); 
 		
 		
     }
@@ -142,46 +145,6 @@ if($result){
 		return $allRequests;
 	}
  
-	// public function callback_success() {
-
-	// 	$this->load->model('extension/payment/yoco');
-	// 	//error_log("complete:::var_dump".PHP_EOL);
-	// 		$doc_data = $this->askForRequestedArguments();
-	// 	$this->model_extension_payment_instapaywebpay->logger($doc_data);
-	// 	$this->load->model( self::CHECKOUT_MODEL );
-
-		
-		
-		
-	// 	//$order_id = $doc_data[2];
-	// 	$action = $doc_data['action'];
-	// 	$order_id = (int)$doc_data['order_id'];
-		
-	// 	$order_info = $this->model_checkout_order->getOrder($order_id);
-	// 	//	$order_info = $this->model_checkout_order->getOrder( $order_id);
-	// 	$resultsComment ='';
-	// 		if($action === 'success'){
-	// 			$orderStatusId = $this->config->get( 'payment_instapaywebpay_success_order_status_id' );
-		
-	// 			$resultsComment = "Notify response from InstaPay WebPay with a status of COMPLETED";
-	// 			$nData = array();
-	// 	$nData['orderStatusID'] = $orderStatusId;
-	// 	$nData['orderID'] = $order_id;
-	// 	$nData['action'] = $action;
-	// 	$nData['orderDetail'] = 'Order for '.$order_info['firstname'].' order no:'.$order_id;
-	// 	$this->model_extension_payment_instapaywebpay->logger($nData);
-		
-	// 			$this->model_checkout_order->addOrderHistory($order_id,$orderStatusId, $resultsComment, false , true);
-	// 			$data['success'] = $this->url->link('checkout/success', '', true);
-
-	// 	//$this->response->redirect($this->url->link('checkout/success'));
-	// 	$this->response->addHeader('Content-Type: application/json');
-	// 		$this->response->setOutput(json_encode($data));	
-	// 		}
-
-			
-		
-	// }
 
 	public function postToken(){
 		$n_data  =  $this->askForRequestedArguments();
@@ -203,14 +166,47 @@ if($result){
 
         $order_info = $this->model_checkout_order->getOrder( $order_id);
 	$preAmount =  $order_info['total'];
-	$currency = $this->getCurrency();
-	$meta = array();
-	$meta['order_id'] = $order_id;
-	$r = array();
-			$amount_in_cents    = substr(''.$preAmount, 0, -2);
-	$r = $this->model_extension_payment_yoco->PostPayment($secret_key,$private_key, $token,($amount_in_cents * 100),$currency,$meta);
-	$this->model_extension_payment_yoco->log_to_file( $r );
-	}
+	// values extracted from request
+$data = [
+    'token' => $token, // Your token for this transaction here
+    'amountInCents' => $n_data['order_id'], // payment in cents amount here
+    'currency' => 'ZAR' // currency here
+];
+
+// Anonymous test key. Replace with your key.
+
+// Initialise the curl handle
+$ch = curl_init();
+
+// Setup curl
+curl_setopt($ch, CURLOPT_URL,"https://online.yoco.com/v1/charges/");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+
+// Basic Authentication method
+// Specify the secret key using the CURLOPT_USERPWD option
+curl_setopt($ch, CURLOPT_USERPWD, $this->secret_key	 . ":". $this->private_key	);
+
+curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+
+// send to yoco
+$result = curl_exec($ch);
+$this->model_extension_payment_yoco->log_to_file(curl_getinfo($ch, CURLINFO_HTTP_CODE));
+
+// close the connection
+curl_close($ch);
+
+// convert response to a usable object
+$response = json_decode($result);
+$this->model_extension_payment_yoco->log_to_file(respons);
+	// $currency = $this->getCurrency();
+	// $meta = array();
+	// $meta['order_id'] = $order_id;
+	// $r = array();
+	// 		$amount_in_cents    = substr(''.$preAmount, 0, -2);
+	// $r = $this->model_extension_payment_yoco->PostPayment($this->secret_key	, $this->private_key	, $token,($amount_in_cents * 100),$currency,$meta);
+	// $this->model_extension_payment_yoco->log_to_file( $r );
+}
 
 
 	public function getOrderIdFromSession(){
@@ -229,7 +225,7 @@ if($result){
 
 	
 	public function setActivityData($order,$orderId){
-		$this->load->model('customer/order');
+	//	$this->load->model('customer/order');
 		if ( $this->customer->isLogged() ) {
 			$activity_data = array(
 				'customer_id' => $this->customer->getId(),
