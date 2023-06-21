@@ -1,0 +1,295 @@
+
+{{ header }}{{ column_left }}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <button type="submit" form="form-paygate" data-toggle="tooltip" title="{{ button_save }}"
+                        class="btn btn-primary">
+                    <i class="fa fa-save"></i></button>
+                <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}"
+                   class="btn btn-default"><i class="fa fa-reply"></i></a>
+            </div>
+            <h1>{{ heading_title }}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        {% if error_warning %}
+        <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+            </div>
+            <div class="panel-body">
+                <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-yoco"
+                      class="form-horizontal">
+
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a>
+                        </li>
+                        <li><a href="#tab-order-status" data-toggle="tab">{{ tab_order_status }}</a></li>
+                        {# <li><a href="#tab-pay-methods" data-toggle="tab">{{ tab_pay_methods }}</a></li> #}
+                    </ul>
+                    <div class="tab-content">
+                 
+
+                        <div class="tab-pane active" id="tab-general">
+                         <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                                <div class="col-sm-10">
+                                    <select name="payment_yoco_status" id="input-status" class="form-control">
+                                        {% if payment_yoco_status %}
+                                        <option value="1" selected="selected">{{ text_enabled }}</option>
+                                        <option value="0">{{ text_disabled }}</option>
+                                        {% else %}
+                                        <option value="1">{{ text_enabled }}</option>
+                                        <option value="0" selected="selected">{{ text_disabled }}</option>
+																				{% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <hr/>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input_live_public_key"><span data-toggle="tooltip" title="{{ help_live_public_key }}">{{ entry_live_public_key }}</span></label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="payment_yoco_live_public_key" id="input_live_public_key"
+                                            value="{{ payment_yoco_live_public_key }}" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input_live_secret_key "><span data-toggle="tooltip" title="{{ help_live_secret_key }}">{{ entry_live_secret_key }}</span></label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="payment_yoco_live_secret_key" id="input_live_secret_key "
+                                            value="{{ payment_yoco_live_secret_key }}" class="form-control">
+                                </div>
+                            </div>
+                            <hr/>
+                              <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input-testmode"><span data-toggle="tooltip" title="{{ help_test }}">{{ entry_test }}</span></label>
+                                <div class="col-sm-10">
+                                    <select name="payment_yoco_testmode" id="input-testmode" class="form-control">
+                                        {% if payment_yoco_testmode %}
+                                            <option value="test" selected="selected">{{ text_testmode }}</option>
+                                            <option value="live">{{ text_livemode }}</option>
+                                        {% else %}
+                                            <option value="test">{{ text_testmode }}</option>
+                                            <option value="live" selected="selected">{{ text_livemode }}</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input_test_public_key"><span data-toggle="tooltip" title="{{ help_test_public_key }}">{{ entry_test_public_key }}</span></label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="payment_yoco_test_public_key" id="input_test_public_key"
+                                            value="{{ payment_yoco_test_public_key }}" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input_test_secret_key"><span data-toggle="tooltip" title="{{ help_test_secret_key }}">{{ entry_test_secret_key }}</span></label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="payment_yoco_test_secret_key" id="input_test_secret_key"
+                                            value="{{ payment_yoco_test_secret_key }}" class="form-control">
+                                </div>
+                            </div>
+                            
+                           
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"
+                                        for="input-geo-zone">{{ entry_geo_zone }}</label>
+                                <div class="col-sm-10">
+                                    <select name="payment_yoco_geozone_id" id="input-geo-zone" class="form-control">
+                                        <option value="0">{{ text_all_zones }}</option>
+                                        {% for geo_zone in geo_zones %}
+                                        {% if geo_zone.geo_zone_id == payment_yoco_geozone_id %}
+                                        <option value="{{ geo_zone.geo_zone_id }}"
+                                                selected="selected">{{ geo_zone.name }}</option>
+                                        {% else %}
+                                        <option value="{{ geo_zone.geo_zone_id }}">{{ geo_zone.name }}</option>
+                                        {% endif %}
+																				{% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                           <div class="form-group">
+                                <label class="col-sm-2 control-label" for="input_total"><span data-toggle="tooltip" title="{{ help_total }}">{{ entry_total }}</span></label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="payment_yoco_total" id="input_total"
+                                            value="{{ payment_yoco_total }}" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"
+                                        for="input-sort-order">{{ entry_sort_order }}</label>
+                                <div class="col-sm-10">
+                                    <input type="text" name="payment_yoco_sort_order" value="{{ payment_yoco_sort_order }}"
+                                            placeholder="{{ entry_sort_order }}" id="input-sort-order"
+                                            class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="tab-order-status">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"
+                                        for="input-order-status">{{ entry_order_status }}</label>
+                                <div class="col-sm-10">
+                                    <select name="payment_yoco_order_status_id" id="input-order-status" class="form-control">
+                                        {% for order_status in order_statuses %}
+                                        {% if order_status.order_status_id == payment_yoco_order_status_id %}
+                                        <option value="{{ order_status.order_status_id }}"
+                                                selected="selected">{{ order_status.name }}</option>
+                                        {% else %}
+                                        <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+																				{% endif %}
+																				{% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"
+                                        for="input-success-order-status">{{ entry_success_status }}</label>
+                                <div class="col-sm-10">
+                                    <select name="payment_yoco_success_order_status_id" id="input-success-order-status"
+                                            class="form-control">
+                                        {% for order_status in order_statuses %}
+                                        {% if order_status.order_status_id == payment_yoco_success_order_status_id %}
+                                        <option value="{{ order_status.order_status_id }}"
+                                                selected="selected">{{ order_status.name }}</option>
+                                        {% else %}
+                                        <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+																				{% endif %}
+																				{% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                           
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"
+                                        for="input-cancelled-order-status">{{ entry_cancelled_status }}</label>
+                                <div class="col-sm-10">
+                                    <select name="payment_yoco_cancelled_order_status_id" id="input-cancelled-order-status"
+                                            class="form-control">
+                                        {% for order_status in order_statuses %}
+                                        {% if order_status.order_status_id == payment_yoco_cancelled_order_status_id %}
+                                        <option value="{{ order_status.order_status_id }}"
+                                                selected="selected">{{ order_status.name }}</option>
+                                        {% else %}
+                                        <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+																				{% endif %}
+																				{% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label"
+                                        for="input-failed-order-status">{{ entry_failed_status }}</label>
+                                <div class="col-sm-10">
+                                    <select name="payment_instapaywebpay_failed_order_status_id" id="input-failed-order-status"
+                                            class="form-control">
+                                        {% for order_status in order_statuses %}
+                                        {% if order_status.order_status_id == payment_instapaywebpay_failed_order_status_id %}
+                                        <option value="{{ order_status.order_status_id }}"
+                                                selected="selected">{{ order_status.name }}</option>
+                                        {% else %}
+                                        <option value="{{ order_status.order_status_id }}">{{ order_status.name }}</option>
+																				{% endif %}
+																				{% endfor %}
+                                    </select>
+                                </div>
+                            </div> 
+                        </div>
+                    
+                        {# <div class="tab-pane" id="tab-pay-methods">
+                            <div class="form-group">
+                                <p class="col-sm-12 text-center">Enabled payment types must also be enabled on your InstaPay® WebPay account. <a href="https://www.instapaybank.com/"  target="_blank">Click here</a> to find out more.</p>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="input-creditcardmethod">{{ entry_creditcardmethod }}</label>
+                                <div class="col-sm-8">
+                                    <select name="payment_instapaywebpay_creditcardmethod" id="input-creditcardmethod" class="form-control">
+                                        {% if payment_instapaywebpay_creditcardmethod == 'true' %}
+                                            <option value="true" selected="selected">{{ text_methodyes }}</option>
+                                            <option value="false">{{ text_methodno }}</option>
+                                        {% else %}
+                                            <option value="true">{{ text_methodyes }}</option>
+                                            <option value="false" selected="selected">{{ text_methodno }}</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="input-banktransfermethod">{{ entry_banktransfermethod }}</label>
+                                <div class="col-sm-8">
+                                    <select name="payment_instapaywebpay_banktransfermethod" id="input-banktransfermethod" class="form-control">
+                                        {% if payment_instapaywebpay_banktransfermethod == 'true' %}
+                                            <option value="true" selected="selected">{{ text_methodyes }}</option>
+                                            <option value="false">{{ text_methodno }}</option>
+                                        {% else %}
+                                            <option value="true">{{ text_methodyes }}</option>
+                                            <option value="false" selected="selected">{{ text_methodno }}</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="input-chipsmethod">{{ entry_chipsmethod }}</label>
+                                <div class="col-sm-8">
+                                    <select name="payment_instapaywebpay_chipsmethod" id="input-chipsmethod" class="form-control">
+                                        {% if payment_instapaywebpay_chipsmethod == 'true' %}
+                                            <option value="true" selected="selected">{{ text_methodyes }}</option>
+                                            <option value="false">{{ text_methodno }}</option>
+                                        {% else %}
+                                            <option value="true">{{ text_methodyes }}</option>
+                                            <option value="false" selected="selected">{{ text_methodno }}</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="input-masterpass">{{ entry_masterpass }}</label>
+                                <div class="col-sm-8">
+                                    <select name="payment_instapaywebpay_masterpass" id="input-masterpass" class="form-control">
+                                        {% if payment_instapaywebpay_masterpass == 'yes' %}
+                                            <option value="yes" selected="selected">{{ text_methodyes }}</option>
+                                            <option value="false">{{ text_methodno }}</option>
+                                        {% else %}
+                                            <option value="yes">{{ text_methodyes }}</option>
+                                            <option value="false" selected="selected">{{ text_methodno }}</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="input-payatdeposit ">{{ entry_payatdeposit }}</label>
+                                <div class="col-sm-8">
+                                    <select name="payment_instapaywebpay_payatdeposit" id="input-payatdeposit " class="form-control">
+                                        {% if payment_instapaywebpay_payatdeposit == 'true' %}
+                                            <option value="true" selected="selected">{{ text_methodyes }}</option>
+                                            <option value="false">{{ text_methodno }}</option>
+                                        {% else %}
+                                            <option value="true">{{ text_methodyes }}</option>
+                                            <option value="false" selected="selected">{{ text_methodno }}</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                          
+                           
+                        </div> #}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{ footer }}

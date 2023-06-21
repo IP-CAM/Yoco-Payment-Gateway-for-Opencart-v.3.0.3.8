@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+<name>YOCO - Payment Gateway</name>
+<code>yoco-000100</code>
+<version>1.0.2.0</version>
+<author>Jan Nortje</author>
+<link>http://www.tubeless.co.za</link>
+<file path="catalog/controller/checkout/checkout.php">
+<operation>
+<search><![CDATA[
+ $this->load->language('checkout/checkout');
+]]></search>
+<add position="after" offset='2'><![CDATA[
+ if($this->config->get('payment_yoco_status')){
+  $this->document->addScript('https://js.yoco.com/sdk/v1/yoco-sdk-web.js');
+  }
+]]></add>
+</operation>
+</file> 
+<file path="system/startup.php">
+<operation>
+<search><![CDATA[
+ require_once(DIR_SYSTEM . 'helper/utf8.php');
+]]></search>
+<add position="after" offset='2'><![CDATA[
+ if($this->config->get('payment_yoco_status')){
+  require_once $_SERVER['DOCUMENT_ROOT'] .'/lib/Yoco/YocoClient.php';
+  }
+]]></add>
+</operation>
+</file> 
+</modification>
